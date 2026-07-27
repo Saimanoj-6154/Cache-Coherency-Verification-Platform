@@ -142,4 +142,8 @@ cache-coherency-verif/
 ```
 
 ---
+## Prerequisites
 
+- A UVM-capable simulator (Questa/VCS) — UVM-1.2 based environment
+- Python 3.10+ (regression runner, coverage/report scripts)
+- GTKWave or simulator-native waveform viewer for debug
