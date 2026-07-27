@@ -28,3 +28,40 @@ and races that are the actual source of coherency bugs.
 - **Assertions (SVA)**: coherence invariants — no two caches hold a
   line Modified simultaneously, a line marked Invalid never supplies
   data, single-writer/multiple-reader property never violated
+
+## Verification Platform Architecture
+
+```
+                ┌─────────────────────────────────────────┐
+                │                Test / Env                 │
+                │                                             │
+   ┌────────────┼───────────┐  ┌────────────┼───────────┐   │
+   │  core0_agent            │  │  core1_agent  ...        │   │
+   │  ┌───────────────────┐ │  │  ┌───────────────────┐  │   │
+   │  │ traffic_driver     │ │  │  │ traffic_driver     │  │   │
+   │  │ (read/write seqs)  │ │  │  │ (read/write seqs)  │  │   │
+   │  └─────────┬──────────┘ │  │  └─────────┬──────────┘  │   │
+   │  ┌─────────▼──────────┐ │  │  ┌─────────▼──────────┐  │   │
+   │  │  bus_monitor        │ │  │  │  bus_monitor        │  │   │
+   │  │ (snoop/req/resp)    │ │  │  │ (snoop/req/resp)    │  │   │
+   │  └─────────┬──────────┘ │  │  └─────────┬──────────┘  │   │
+   └────────────┼───────────┘  └────────────┼───────────┘   │
+                └──────────────┬─────────────┘                │
+                               ▼                               │
+                 ┌───────────────────────┐                     │
+                 │  Coherence Reference   │  per-line, per-core │
+                 │  Model (golden state)  │  MESI state predict │
+                 └───────────┬───────────┘                     │
+                             ▼                                 │
+                 ┌───────────────────────┐                     │
+                 │      Scoreboard        │  state + data check │
+                 └───────────┬───────────┘                     │
+                             ▼                                 │
+                 ┌───────────────────────┐                     │
+                 │  Functional Coverage   │  transitions, races,│
+                 │                        │  false-sharing      │
+                 └───────────────────────┘                     │
+                └─────────────────────────────────────────┘
+```
+
+---
