@@ -147,3 +147,32 @@ cache-coherency-verif/
 - A UVM-capable simulator (Questa/VCS) — UVM-1.2 based environment
 - Python 3.10+ (regression runner, coverage/report scripts)
 - GTKWave or simulator-native waveform viewer for debug
+
+
+## Verification Approach
+
+- **Testplan-driven**: every protocol feature and race scenario in
+  `docs/verification_plan.md` maps to a covergroup/bin — closure is
+  tracked against the plan, not just aggregate coverage percentage.
+- **Reference model**: an independent per-line, per-core state
+  predictor tracks expected MESI state and expected data value; the
+  scoreboard compares this against RTL-observed bus transactions and
+  read responses cycle-by-cycle.
+- **Multi-master concurrent stimulus**: the actual differentiator —
+  independent per-core sequences run concurrently against shared and
+  private addresses, so the environment naturally generates racing
+  snoop requests rather than relying on hand-crafted timing.
+- **Directed race sequences**: on top of random traffic, specific
+  known-hard scenarios are targeted directly — simultaneous BusRdX
+  from two cores on the same line, false sharing across adjacent
+  words in the same line, back-to-back invalidate/re-fill storms.
+- **Functional coverage**: full MESI transition matrix per line,
+  snoop response types (HIT/HITM/MISS), cache-to-cache transfer vs.
+  memory-fill source, race scenario occurrence counts.
+- **Assertions (SVA)**: structural coherence invariants that must hold
+  regardless of stimulus — single-writer/multiple-reader property,
+  no data supplied from an Invalid line, no illegal state transition.
+- **Regression discipline**: every test runs with multiple random
+  seeds in CI; coverage merged and reported against the testplan on
+  every run, since coherency bugs are exactly the kind that vanish on
+  seed change if not caught with breadth.
