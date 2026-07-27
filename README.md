@@ -142,7 +142,7 @@ cache-coherency-verif/
 ```
 
 ---
-## Prerequisites
+## Tools
 
 - A UVM-capable simulator (Questa/VCS) — UVM-1.2 based environment
 - Python 3.10+ (regression runner, coverage/report scripts)
