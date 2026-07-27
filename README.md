@@ -65,3 +65,81 @@ and races that are the actual source of coherency bugs.
 ```
 
 ---
+
+## Repository Structure
+
+```
+cache-coherency-verif/
+├── README.md
+├── LICENSE
+├── .gitignore
+├── Makefile                          # top-level: make sim / make regress / make cov
+├── docs/
+│   ├── coherence_protocol_spec.md    # MESI/MOESI states, transitions, bus protocol assumed
+│   ├── verification_plan.md          # feature list, race scenarios, coverage model
+│   ├── testplan_to_coverage_map.md   # traceability: testplan item -> covergroup/bin
+│   └── env_architecture.md           # agent/env block diagram + config knobs
+│
+├── rtl/
+│   └── dut/
+│       ├── cache_core.sv             # per-core cache + FSM (MESI/MOESI states)
+│       ├── snoop_bus.sv              # shared snoop bus / directory
+│       └── coherence_fsm.sv
+│
+├── verif/
+│   ├── uvm/
+│   │   ├── agents/
+│   │   │   └── core_agent/
+│   │   │       ├── traffic_driver.sv     # drives per-core read/write requests
+│   │   │       ├── bus_monitor.sv        # observes snoop req/resp on shared bus
+│   │   │       ├── core_sequencer.sv
+│   │   │       └── core_item.sv
+│   │   ├── env/
+│   │   │   ├── coherence_env.sv
+│   │   │   ├── coherence_env_config.sv
+│   │   │   ├── coherence_virtual_sequencer.sv
+│   │   │   ├── coherence_ref_model.sv    # golden per-line, per-core state predictor
+│   │   │   ├── coherence_scoreboard.sv   # state + data correctness checking
+│   │   │   └── coherence_coverage.sv
+│   │   ├── sequences/
+│   │   │   ├── virtual_seq/
+│   │   │   │   ├── base_vseq.sv
+│   │   │   │   ├── shared_addr_stress_vseq.sv   # all cores hammer same lines
+│   │   │   │   ├── false_sharing_vseq.sv        # adjacent-word, different-line access
+│   │   │   │   ├── simultaneous_busrdx_vseq.sv  # racing write-invalidate requests
+│   │   │   │   └── random_traffic_vseq.sv       # constrained-random mixed access
+│   │   │   └── core_seq/
+│   │   │       └── core_seq_lib.sv
+│   │   └── tests/
+│   │       ├── coherence_base_test.sv
+│   │       ├── smoke_test.sv
+│   │       ├── shared_addr_stress_test.sv
+│   │       ├── false_sharing_test.sv
+│   │       ├── snoop_race_test.sv
+│   │       └── regression_test_list.f
+│   └── sva/
+│       ├── single_writer_assertions.sv    # no two caches Modified simultaneously
+│       ├── invalid_no_data_assertions.sv  # Invalid line never supplies data
+│       └── transition_legality_assertions.sv
+│
+├── sim/
+│   ├── questasim/
+│   │   └── run_uvm.do
+│   └── vcs/
+│       └── run.sh
+│
+├── regression/
+│   ├── run_regression.py             # runs full test_list.f, seeds swept
+│   ├── coverage_merge.py
+│   └── report_gen.py                 # HTML pass/fail + coverage report
+│
+├── scripts/
+│   └── waveform_gen.sh
+│
+└── .github/
+    └── workflows/
+        └── ci.yml                    # lint + smoke regression on push
+```
+
+---
+
