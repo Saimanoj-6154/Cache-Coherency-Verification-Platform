@@ -169,3 +169,11 @@ cache-coherency-verif/
 - **Functional coverage**: full MESI transition matrix per line,
   snoop response types (HIT/HITM/MISS), cache-to-cache transfer vs.
   memory-fill source, race scenario occurrence counts.
+  - **Assertions (SVA)**: structural coherence invariants that must hold
+  regardless of stimulus — single-writer/multiple-reader property,
+  no data supplied from an Invalid line, no illegal state transition.
+- **Regression discipline**: every test runs with multiple random
+  seeds in CI; coverage merged and reported against the testplan on
+  every run, since coherency bugs are exactly the kind that vanish on
+  seed change if not caught with breadth.
+
